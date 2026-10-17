@@ -83,62 +83,84 @@ export const AccountView: React.FC<{ screen?: AccountScreen; orderId?: string }>
     setSessionUser(user ? { id: user.id, name: user.name, email: user.email } : null);
   };
 
+  const authFailure = (error: unknown, fallback: string) => {
+    if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+      return error.message;
+    }
+    return fallback;
+  };
+
   const handleLoginSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
     setAuthError('');
-    const result = await authClient.signIn.email({
-      email: loginEmail.trim(),
-      password: loginPassword,
-    });
-    setPending(false);
-    if (result.error) {
-      setAuthError(result.error.message || 'Connexion impossible.');
-      return;
+    try {
+      const result = await authClient.signIn.email({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      });
+      if (result.error) {
+        setAuthError(result.error.message || 'Connexion impossible.');
+        return;
+      }
+      await refreshSession();
+      const next = new URLSearchParams(window.location.search).get('next');
+      if (next?.startsWith('/admin') && isAdminEmail(result.data?.user?.email)) {
+        window.location.assign(next);
+        return;
+      }
+      showToast('Vous êtes connectée.', 'success');
+      navigateTo('account');
+    } catch (error) {
+      setAuthError(authFailure(error, 'Connexion impossible.'));
+    } finally {
+      setPending(false);
     }
-    await refreshSession();
-    const next = new URLSearchParams(window.location.search).get('next');
-    if (next?.startsWith('/admin') && isAdminEmail(result.data?.user?.email)) {
-      window.location.assign(next);
-      return;
-    }
-    showToast('Vous êtes connectée.', 'success');
-    navigateTo('account');
   };
 
   const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
     setAuthError('');
-    const result = await authClient.signUp.email({
-      email: registerEmail.trim(),
-      password: loginPassword,
-      name: registerName.trim(),
-    });
-    setPending(false);
-    if (result.error) {
-      setAuthError(result.error.message || 'Inscription impossible.');
-      return;
+    try {
+      const result = await authClient.signUp.email({
+        email: registerEmail.trim(),
+        password: loginPassword,
+        name: registerName.trim(),
+      });
+      if (result.error) {
+        setAuthError(result.error.message || 'Inscription impossible.');
+        return;
+      }
+      await refreshSession();
+      showToast('Compte créé.', 'success');
+      navigateTo('account');
+    } catch (error) {
+      setAuthError(authFailure(error, 'Inscription impossible.'));
+    } finally {
+      setPending(false);
     }
-    await refreshSession();
-    showToast('Compte créé.', 'success');
-    navigateTo('account');
   };
 
   const handleForgot = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
     setAuthError('');
-    const result = await authClient.requestPasswordReset({
-      email: loginEmail.trim(),
-      redirectTo: `${window.location.origin}/compte/mot-de-passe`,
-    });
-    setPending(false);
-    if (result.error) {
-      setAuthError(result.error.message || 'Envoi impossible.');
-      return;
+    try {
+      const result = await authClient.requestPasswordReset({
+        email: loginEmail.trim(),
+        redirectTo: `${window.location.origin}/compte/mot-de-passe`,
+      });
+      if (result.error) {
+        setAuthError(result.error.message || 'Envoi impossible.');
+        return;
+      }
+      showToast('Si ce compte existe, un email de réinitialisation a été envoyé.', 'info');
+    } catch (error) {
+      setAuthError(authFailure(error, 'Envoi impossible.'));
+    } finally {
+      setPending(false);
     }
-    showToast('Si ce compte existe, un email de réinitialisation a été envoyé.', 'info');
   };
 
   const handleResetPassword = async (event: React.FormEvent) => {
@@ -150,17 +172,22 @@ export const AccountView: React.FC<{ screen?: AccountScreen; orderId?: string }>
     }
     setPending(true);
     setAuthError('');
-    const result = await authClient.resetPassword({
-      newPassword: loginPassword,
-      token: resetToken,
-    });
-    setPending(false);
-    if (result.error) {
-      setAuthError(result.error.message || 'Ce lien n’est plus valable.');
-      return;
+    try {
+      const result = await authClient.resetPassword({
+        newPassword: loginPassword,
+        token: resetToken,
+      });
+      if (result.error) {
+        setAuthError(result.error.message || 'Ce lien n’est plus valable.');
+        return;
+      }
+      showToast('Mot de passe mis à jour. Vous pouvez vous connecter.', 'success');
+      window.location.assign('/compte/connexion');
+    } catch (error) {
+      setAuthError(authFailure(error, 'Ce lien n’est plus valable.'));
+    } finally {
+      setPending(false);
     }
-    showToast('Mot de passe mis à jour. Vous pouvez vous connecter.', 'success');
-    window.location.assign('/compte/connexion');
   };
 
   const handleSignOut = async () => {
