@@ -1,0 +1,6 @@
+{
+  "name": "Charmies by Sousou — Jewelry & Accessories",
+  "description": "An elegant, premium e-commerce boutique for women's jewelry and accessories featuring delicate craftsmanship, Cash on Delivery in Tunisia, and an intuitive store administration dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
