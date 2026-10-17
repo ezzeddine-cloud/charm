@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import { useStore } from '../context/StoreContext';
 import { authClient } from '@/lib/auth/client';
@@ -48,6 +49,19 @@ export const Navbar: React.FC = () => {
       cancelled = true;
     };
   }, [pathname]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileMenuOpen]);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -237,8 +251,8 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen
+        ? createPortal(
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
@@ -259,6 +273,7 @@ export const Navbar: React.FC = () => {
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-1 text-[#4A3E39] hover:text-[#2C2420]"
+                  aria-label="Fermer le menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -366,8 +381,10 @@ export const Navbar: React.FC = () => {
               </div>
             ) : null}
           </div>
-        </div>
-      )}
+        </div>,
+        document.body,
+      )
+        : null}
     </header>
   );
 };
