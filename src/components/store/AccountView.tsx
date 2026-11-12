@@ -6,7 +6,7 @@ import { useStore } from '../../context/StoreContext';
 import { authClient } from '@/lib/auth/client';
 import { isAdminEmail } from '@/lib/admin-access';
 import type { Order } from '@/types';
-import { User, Package, MapPin, Sparkles, LayoutDashboard } from 'lucide-react';
+import { User, Package, MapPin, Sparkles, LayoutDashboard, Eye, EyeOff } from 'lucide-react';
 
 type AccountScreen = 'profile' | 'orders' | 'addresses' | 'login' | 'register' | 'forgot' | 'order';
 
@@ -470,16 +470,34 @@ function Field({
   onChange: (value: string) => void;
   type?: string;
 }) {
+  const [visible, setVisible] = useState(false);
+  const isPassword = type === 'password';
+
   return (
     <div>
       <label className="text-xs text-[#4A3E39] block mb-1">{label}</label>
-      <input
-        required
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full px-3 py-2 bg-[#FAF7F2] border border-[#E8DFD5] rounded-md text-xs"
-      />
+      <div className="relative">
+        <input
+          required
+          type={isPassword && visible ? 'text' : type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={`w-full px-3 py-2 bg-[#FAF7F2] border border-[#E8DFD5] rounded-md text-xs ${
+            isPassword ? 'pr-10' : ''
+          }`}
+        />
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setVisible((current) => !current)}
+            className="absolute inset-y-0 right-0 px-3 text-[#8C7A70] hover:text-[#2C2420]"
+            aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            aria-pressed={visible}
+          >
+            {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
