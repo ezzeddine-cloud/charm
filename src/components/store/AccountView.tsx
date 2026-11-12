@@ -6,7 +6,7 @@ import { useStore } from '../../context/StoreContext';
 import { authClient } from '@/lib/auth/client';
 import { isAdminEmail } from '@/lib/admin-access';
 import type { Order } from '@/types';
-import { User, Package, MapPin, Sparkles } from 'lucide-react';
+import { User, Package, MapPin, Sparkles, LayoutDashboard } from 'lucide-react';
 
 type AccountScreen = 'profile' | 'orders' | 'addresses' | 'login' | 'register' | 'forgot' | 'order';
 
@@ -19,7 +19,7 @@ type SessionUser = {
 export const AccountView: React.FC<{ screen?: AccountScreen; orderId?: string }> = ({
   screen = 'profile',
 }) => {
-  const { navigateTo, showToast } = useStore();
+  const { navigateTo, navigateToAdmin, showToast } = useStore();
   const tab: 'profile' | 'orders' | 'addresses' =
     screen === 'orders' || screen === 'addresses' ? screen : 'profile';
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
@@ -354,6 +354,16 @@ export const AccountView: React.FC<{ screen?: AccountScreen; orderId?: string }>
               <MapPin className="w-4 h-4" />
               <span>Carnet d&apos;adresses</span>
             </Link>
+            {isAdminEmail(sessionUser.email) ? (
+              <button
+                type="button"
+                onClick={() => navigateToAdmin('dashboard')}
+                className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-2.5 bg-[#F4EADA] text-[#2C2420] hover:bg-[#E8DACB]"
+              >
+                <LayoutDashboard className="w-4 h-4 text-[#9A7235]" />
+                <span>Panneau Administration</span>
+              </button>
+            ) : null}
           </div>
 
           <div className="md:col-span-8 bg-[#FAF7F2] p-6 rounded-xl border border-[#E8DFD5] shadow-xs">

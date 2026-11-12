@@ -241,11 +241,11 @@ export const Navbar: React.FC = () => {
           {isAdmin ? (
             <button
               onClick={() => navigateToAdmin('dashboard')}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2420] bg-[#F4EADA] border border-[#C69A58]/40 rounded-md hover:bg-[#E8DACB] transition-colors ml-1"
+              className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium text-[#2C2420] bg-[#F4EADA] border border-[#C69A58]/40 rounded-md hover:bg-[#E8DACB] transition-colors ml-1"
               title="Accéder au panneau d'administration"
             >
               <LayoutDashboard className="w-3.5 h-3.5 text-[#9A7235]" />
-              <span>Admin Store</span>
+              <span className="hidden sm:inline">Admin Store</span>
             </button>
           ) : null}
         </div>
